@@ -3,10 +3,10 @@ $:.unshift(File.dirname(__FILE__)) unless
 
 require 'ffi'
 
-require "curl_ffi/ffi_bindings"
+require "curl_ffi/bindings"
 
 module CurlFFI
-  extend CurlFFI::CurlBindings
+  extend CurlFFI::Bindings
 
   autoload :Easy,   "curl_ffi/easy"
   autoload :Multi,  "curl_ffi/multi"
