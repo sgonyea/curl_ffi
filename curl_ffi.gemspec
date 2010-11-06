@@ -1,8 +1,12 @@
+# -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
+require "curl_ffi/version"
+
 Gem::Specification.new do |s|
-  s.name        = "curl-ffi"
-  s.version     = "0.0.1"
+  s.name        = "curl_ffi"
+  s.version     = CurlFFI::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Arthur Schreiber"]
+  s.authors     = ["Arthur Schreiber", "Scott Gonyea"]
   s.email       = ["schreiber.arthur@gmail.com"]
   s.homepage    = "http://github.com/nokarma/curl-ffi"
   s.summary     = "An FFI based libCurl interface"
@@ -14,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency "ffi"
   s.add_development_dependency "rspec"
 
-  s.files        = File.readlines('Manifest.txt').map { |line| line.strip }
-  s.require_path = 'lib'
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.require_paths = ["lib"]
 end
