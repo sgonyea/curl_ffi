@@ -1,8 +1,8 @@
 require "spec_helper"
 
-module Curl
+module CurlFFI
   describe Easy, ".new" do
-    it "should return a new Curl::Easy object" do
+    it "should return a new CurlFFI::Easy object" do
       Easy.new.should be_a(Easy)
     end
   end
@@ -13,7 +13,7 @@ module Curl
     end
 
     describe "#dup" do
-      it "should return a new Curl::Easy object" do
+      it "should return a new CurlFFI::Easy object" do
         @easy.dup.should be_a(Easy)
       end
 

@@ -1,3 +1,3 @@
 require "rubygems"
 
-require "lib/curl"
+require File.expand_path("../lib/curl_ffi", File.dirname(__FILE__))

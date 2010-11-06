@@ -4,7 +4,7 @@ require "rubygems"
 require "benchmark"
 require "eventmachine"
 
-require File.expand_path("../lib/curl", File.dirname(__FILE__))
+require File.expand_path("../lib/curl_ffi", File.dirname(__FILE__))
 
 if FFI::Platform.windows?
   # Sockets returned by curl are WinSock SOCKETs

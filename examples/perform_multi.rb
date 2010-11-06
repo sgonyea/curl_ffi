@@ -1,6 +1,6 @@
 require "rubygems"
 
-require File.expand_path("../lib/curl", File.dirname(__FILE__))
+require File.expand_path("../lib/curl_ffi", File.dirname(__FILE__))
 
 multi = CurlFFI::Multi.new
 

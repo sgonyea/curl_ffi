@@ -1,8 +1,8 @@
 require "spec_helper"
 
-module Curl
+module CurlFFI
   describe Multi, ".new" do
-    it "should return a new Curl::Easy object" do
+    it "should return a new CurlFFI::Easy object" do
       Multi.new.should be_a(Multi)
     end
   end
@@ -25,13 +25,13 @@ module Curl
         @multi.info_read_next.should be_nil
       end
 
-      it "should return Curl::Message objects when messages are available" do
+      it "should return CurlFFI::Message objects when messages are available" do
         @easy.setopt(OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
 
         @multi.perform while @multi.running != 0
         message = @multi.info_read_next
-        message.should be_a(Curl::Message)
+        message.should be_a(CurlFFI::Message)
         message[:msg].should == :DONE
       end
     end
@@ -41,7 +41,7 @@ module Curl
         @multi.info_read_all.should == []
       end
 
-      it "should return an array of Curl::Message objects when messages are available" do
+      it "should return an array of CurlFFI::Message objects when messages are available" do
         @easy.setopt(OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
 
@@ -49,7 +49,7 @@ module Curl
         messages = @multi.info_read_all
         messages.size.should == 1
 
-        messages.first.should be_a(Curl::Message)
+        messages.first.should be_a(CurlFFI::Message)
         messages.first[:msg].should == :DONE
       end
     end
