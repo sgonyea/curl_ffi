@@ -1,20 +1,20 @@
-require "spec_helper"
+require File.expand_path("../spec_helper", File.dirname(__FILE__))
 
-module CurlFFI
-  describe Easy, ".new" do
+describe CurlFFI::Easy do
+  describe "when calling Easy.new" do
     it "should return a new CurlFFI::Easy object" do
-      Easy.new.should be_a(Easy)
+      CurlFFI::Easy.new.should be_a(CurlFFI::Easy)
     end
   end
 
-  describe Easy do
+  describe "CurlFFI::Easy" do
     before :each do
-      @easy = Easy.new
+      @easy = CurlFFI::Easy.new
     end
 
     describe "#dup" do
       it "should return a new CurlFFI::Easy object" do
-        @easy.dup.should be_a(Easy)
+        @easy.dup.should be_a(CurlFFI::Easy)
       end
 
       it "should have a seperate libCurl handle" do
@@ -31,20 +31,20 @@ module CurlFFI
 
     describe "#setopt" do
       it "should correctly set string options" do
-        @easy.setopt(OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
       end
 
       it "should correctly set string options" do
-        @easy.setopt(OPTION[:PORT], 123)
+        @easy.setopt(CurlFFI::OPTION[:PORT], 123)
       end
     end
 
     describe "#getinfo" do
       it "should return internal information" do
-        @easy.getinfo(INFO[:EFFECTIVE_URL]).should == ""
+        @easy.getinfo(CurlFFI::INFO[:EFFECTIVE_URL]).should == ""
 
-        @easy.setopt(OPTION[:URL], "http://google.de")
-        @easy.getinfo(INFO[:EFFECTIVE_URL]).should == "http://google.de"
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
+        @easy.getinfo(CurlFFI::INFO[:EFFECTIVE_URL]).should == "http://google.de"
       end
     end
 

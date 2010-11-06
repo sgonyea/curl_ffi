@@ -1,17 +1,17 @@
-require "spec_helper"
+require File.expand_path("../spec_helper", File.dirname(__FILE__))
 
-module CurlFFI
-  describe Multi, ".new" do
+describe CurlFFI::Multi do
+  describe "CurlFFI::Multi.new" do
     it "should return a new CurlFFI::Easy object" do
-      Multi.new.should be_a(Multi)
+      CurlFFI::Multi.new.should be_a(CurlFFI::Multi)
     end
   end
 
-  describe Multi do
+  describe "Multi should work" do
     before :each do
-      @multi = Multi.new
-      @easy = Easy.new
-      @easy.setopt(OPTION[:PROXY], "")
+      @multi = CurlFFI::Multi.new
+      @easy = CurlFFI::Easy.new
+      @easy.setopt(CurlFFI::OPTION[:PROXY], "")
     end
 
     describe "#add_handle" do
@@ -26,7 +26,7 @@ module CurlFFI
       end
 
       it "should return CurlFFI::Message objects when messages are available" do
-        @easy.setopt(OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
 
         @multi.perform while @multi.running != 0
@@ -42,7 +42,7 @@ module CurlFFI
       end
 
       it "should return an array of CurlFFI::Message objects when messages are available" do
-        @easy.setopt(OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
 
         @multi.perform while @multi.running != 0
@@ -60,7 +60,7 @@ module CurlFFI
       end
 
       it "should return the timeout till the next call to #perform" do
-        @easy.setopt(OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
 
         @multi.timeout.should == 1
@@ -71,7 +71,7 @@ module CurlFFI
 
     describe "#perform" do
       before :each do
-        @easy.setopt(OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
         @multi.add_handle(@easy)
       end
 
