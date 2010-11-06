@@ -13,7 +13,6 @@ task :gem => :gemspec
 desc %{Build the gemspec file.}
 task :gemspec do
   gemspec.validate
-  File.open("#{gemspec.name}.gemspec", 'w'){|f| f.write gemspec.to_ruby }
 end
 
 desc %{Release the gem to RubyGems.org}
