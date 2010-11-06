@@ -118,7 +118,7 @@ def check_run_count
 end
 
 $timeout = 0
-$multi = Curl::Multi.new
+$multi = CurlFFI::Multi.new
 $multi.setopt(:SOCKETFUNCTION, sock_callback)
 $multi.setopt(:TIMERFUNCTION, multi_timer_callback)
 
@@ -170,7 +170,7 @@ $multi.setopt(:TIMERFUNCTION, multi_timer_callback)
   "http://www.bloglines.com",
   "http://www.techweb.com",
   "http://www.newslink.org" ].each do |url|
-    e = Curl::Easy.new
+    e = CurlFFI::Easy.new
     e.setopt(:PROXY, "")
     e.setopt(:URL, url)
     e.setopt(:NOPROGRESS, 0)
@@ -209,7 +209,7 @@ begin
   if !read && !write
     puts "!!! Socket timeout"
     begin
-      rc = $multi.socket_action(Curl::SOCKET_TIMEOUT, 0)
+      rc = $multi.socket_action(CurlFFI::SOCKET_TIMEOUT, 0)
       puts rc
     end while rc == :CALL_MULTI_PERFORM
     mcode_or_die("timer_cb: curl_multi_socket_action", rc)

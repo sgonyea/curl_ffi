@@ -135,7 +135,7 @@ multi_timer_callback = FFI::Function.new(:int, [:pointer, :long]) do |multi_ptr,
   $timer && $timer.cancel
   $timer = EventMachine::Timer.new(timeout_ms / 1000.0) {
     begin
-      rc = $multi.socket_action(Curl::SOCKET_TIMEOUT, 0)
+      rc = $multi.socket_action(CurlFFI::SOCKET_TIMEOUT, 0)
       puts rc
     end while rc == :CALL_MULTI_PERFORM
     mcode_or_die("timer_cb: curl_multi_socket_action", rc)
@@ -158,7 +158,7 @@ end
 PROGRESS_CALLBACK = FFI::Function.new(:int, [:pointer, :double, :double, :double, :double], &self.method(:progress_callback))
 WRITE_CALLBACK = FFI::Function.new(:size_t, [:pointer, :size_t, :size_t, :pointer], &self.method(:write_callback))
 
-$multi = Curl::Multi.new
+$multi = CurlFFI::Multi.new
 $multi.setopt(:SOCKETFUNCTION, sock_callback)
 $multi.setopt(:TIMERFUNCTION, multi_timer_callback)
 
@@ -211,7 +211,7 @@ EventMachine::run {
     "http://www.bloglines.com",
     "http://www.techweb.com",
     "http://www.newslink.org" ].each do |url|
-    e = Curl::Easy.new
+    e = CurlFFI::Easy.new
     e.setopt(:PROXY, "")
     e.setopt(:URL, url)
     e.setopt(:NOPROGRESS, 0)

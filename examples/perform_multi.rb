@@ -2,16 +2,16 @@ require "rubygems"
 
 require File.expand_path("../lib/curl", File.dirname(__FILE__))
 
-multi = Curl::Multi.new
+multi = CurlFFI::Multi.new
 
-e = Curl::Easy.new
+e = CurlFFI::Easy.new
 e.setopt(:PROXY, "")
 e.setopt(:URL, "http://www.un.org")
 
 multi.add_handle(e)
 
 
-e = Curl::Easy.new
+e = CurlFFI::Easy.new
 e.setopt(:PROXY, "")
 e.setopt(:URL, "http://www.google.com")
 
