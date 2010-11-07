@@ -14,6 +14,8 @@ module CurlFFI
     SOCKET_BAD = -1
   end
 
+  ERROR_SIZE            = 256 + 1
+
   SOCKET_TIMEOUT        = SOCKET_BAD
 
   OPTION_LONG           = 0
@@ -922,6 +924,8 @@ module CurlFFI
   attach_function :easy_setopt_curl_off_t, :curl_easy_setopt, [:pointer, :option, :curl_off_t], :code
   attach_function :easy_strerror, :curl_easy_strerror, [:code], :string
 
+  callback :handler_function, [:string, :size_t, :size_t, :pointer], :size_t
+  attach_function :easy_setopt_handler, :curl_easy_setopt, [:pointer, :option, :handler_function], :code
 
   def self.easy_setopt(handle, option, value)
     option = OPTION[option] if option.is_a?(Symbol)
