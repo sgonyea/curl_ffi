@@ -26,7 +26,7 @@ describe CurlFFI::Multi do
       end
 
       it "should return CurlFFI::Message objects when messages are available" do
-        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://www.google.de/")
         @multi.add_handle(@easy)
 
         @multi.perform while @multi.running != 0
@@ -42,7 +42,7 @@ describe CurlFFI::Multi do
       end
 
       it "should return an array of CurlFFI::Message objects when messages are available" do
-        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://www.google.de/")
         @multi.add_handle(@easy)
 
         @multi.perform while @multi.running != 0
@@ -60,7 +60,7 @@ describe CurlFFI::Multi do
       end
 
       it "should return the timeout till the next call to #perform" do
-        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://www.google.de/")
         @multi.add_handle(@easy)
 
         @multi.timeout.should == 1
@@ -71,7 +71,7 @@ describe CurlFFI::Multi do
 
     describe "#perform" do
       before :each do
-        @easy.setopt(CurlFFI::OPTION[:URL], "http://google.de")
+        @easy.setopt(CurlFFI::OPTION[:URL], "http://www.google.de/")
         @multi.add_handle(@easy)
       end
 

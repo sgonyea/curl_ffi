@@ -2,6 +2,7 @@ require "curl_ffi"
 
 module CurlFFI
   class Easy
+
     attr_reader :pointer
 
     def initialize

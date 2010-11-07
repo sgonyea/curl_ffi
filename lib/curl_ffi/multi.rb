@@ -2,6 +2,7 @@ require "curl_ffi"
 
 module CurlFFI
   class Multi
+
     attr_reader :pointer, :running
 
     def initialize
