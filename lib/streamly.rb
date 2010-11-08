@@ -7,7 +7,7 @@ require "curl_ffi"
 module Streamly
   extend FFI::Library
 
-  require "streamly/request"
+  autoload :Request, "streamly/request"
 
   class Error               < StandardError; end
   class UnsupportedProtocol < StandardError; end
@@ -53,9 +53,9 @@ module Streamly
   # 
   # This method also accepts a block, which will stream the response body in chunks to the caller
   def self.get(url, headers=nil, &block)
-    opts = {:method => :get, :url => url, :headers => headers}
+    opts = {:headers => headers}
     opts.merge!({:response_body_handler => block}) if block_given?
-    Request.execute(opts)
+    Request.execute(url, :get, opts)
   end
 
   # A helper method to make HEAD requests a dead-simple one-liner
@@ -74,9 +74,9 @@ module Streamly
   # 
   # This method also accepts a block, which will stream the response body in chunks to the caller
   def self.post(url, payload, headers=nil, &block)
-    opts = {:method => :post, :url => url, :payload => payload, :headers => headers}
+    opts = {:payload => payload, :headers => headers}
     opts.merge!({:response_body_handler => block}) if block_given?
-    Request.execute(opts)
+    Request.execute(url, :post, opts)
   end
 
   # A helper method to make HEAD requests a dead-simple one-liner
@@ -95,9 +95,9 @@ module Streamly
   # 
   # This method also accepts a block, which will stream the response body in chunks to the caller
   def self.put(url, payload, headers=nil, &block)
-    opts = {:method => :put, :url => url, :payload => payload, :headers => headers}
+    opts = {:payload => payload, :headers => headers}
     opts.merge!({:response_body_handler => block}) if block_given?
-    Request.execute(opts)
+    Request.execute(url, :put, opts)
   end
 
   # A helper method to make HEAD requests a dead-simple one-liner

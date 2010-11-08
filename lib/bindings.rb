@@ -925,7 +925,10 @@ module CurlFFI
   attach_function :easy_strerror, :curl_easy_strerror, [:code], :string
 
   callback :handler_function, [:string, :size_t, :size_t, :pointer], :size_t
-  attach_function :easy_setopt_handler, :curl_easy_setopt, [:pointer, :option, :handler_function], :code
+  attach_function :easy_setopt_handler_function, :curl_easy_setopt, [:pointer, :option, :handler_function], :code
+
+  callback :handler_string, [:string, :size_t, :size_t, :string], :size_t
+  attach_function :easy_setopt_handler_string, :curl_easy_setopt, [:pointer, :option, :handler_string], :code
 
   def self.easy_setopt(handle, option, value)
     option = OPTION[option] if option.is_a?(Symbol)
@@ -950,7 +953,7 @@ module CurlFFI
     option = OPTION[option] if option.is_a?(Symbol)
 
     if option >= OPTION_FUNCTIONPOINT
-      self.easy_setopt_handler(handle, option, value)
+      self.easy_setopt_handler_function(handle, option, value)
     end
   end
 

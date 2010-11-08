@@ -48,6 +48,10 @@ module CurlFFI
       check_code(CurlFFI.easy_setopt_handler(@pointer, option, value))
     end
 
+    def setopt_str_handler(option, value)
+      check_code(CurlFFI.easy_setopt_handler_string(@pointer, option, value))
+    end
+
     def getinfo(info)
       info = INFO[info] if info.is_a?(Symbol)
 
@@ -64,8 +68,9 @@ module CurlFFI
 
     protected
       def check_code(result)
+        
         if result != :OK
-          raise "Error - #{result}"
+          raise "Error - #{result}" unless result.nil?
         end
         return result
       end

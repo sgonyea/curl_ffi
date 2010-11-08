@@ -7,20 +7,22 @@ module Streamly
 
     attr_reader :response_header_handler, :response_body_handler
 
-    HeaderHandler = Proc.new do |stream, size, nmemb, handler|
-      case handler
-      when  String  then  handler += stream
-      else                handler.call(stream)
-      end
-      return(size * nmemb)
+    CallHandler = Proc.new do |stream, size, nmemb, handler|
+      handler.call(stream)
+      size * nmemb
+    end
+
+    StringHandler = Proc.new do |stream, size, nmemb, handler|
+      handler << stream
+      size * nmemb
     end
 
     DataHandler = Proc.new do |stream, size, nmemb, handler|
       case handler
-      when  String  then  handler += stream
+      when  String  then  handler << stream
       else                handler.call(stream)
       end
-      return(size * nmemb)
+      size * nmemb
     end
 
     # @TODO: Argumenting Checking + Error Handling
@@ -29,9 +31,9 @@ module Streamly
       # method should be :post, :get, :put, :delete, :head
       # options should contain any of the following keys:
       #   :headers, :response_header_handler, :response_body_handler, :payload (required if method = :post / :put)
-      
-      @response_header_handler  ||= options[:response_header_handler] || FFI::MemoryPointer.from_string("")
-      @response_body_handler    ||= options[:response_body_handler]   || FFI::MemoryPointer.from_string("")
+
+#      @response_header_handler  ||= options[:response_header_handler] || FFI::MemoryPointer.from_string("")
+#      @response_body_handler    ||= options[:response_body_handler]   || FFI::MemoryPointer.from_string("")
 
       case method
       when :get     then  connection.setopt :HTTPGET,        1
@@ -48,21 +50,38 @@ module Streamly
 
       if options[:headers].is_a? Hash and options[:headers].size > 0
         options[:headers].each_pair do |key_and_value|
-          @request_headers = CurlFFI.slist_append(self.request_headers, key_and_value.join(": "))
+          @request_headers = CurlFFI.slist_append(request_headers, key_and_value.join(": "))
         end
         connection.setopt :HTTPHEADER, @request_headers
       end
 
-      connection.setopt_handler :HEADERFUNCTION,  HeaderHandler
-      connection.setopt_handler :WRITEHEADER,     @response_header_handler
-
-      unless method == :head
-        connection.setopt         :ENCODING,      "identity, deflate, gzip"
-        connection.setopt_handler :WRITEFUNCTION, HeaderHandler
-        connection.setopt_handler :WRITEDATA,     @response_header_handler
+      if options[:response_header_handler].nil?
+#        @response_header_handler = FFI::MemoryPointer.from_string("")
+        @response_header_handler = ""
+        connection.setopt_str_handler :HEADERFUNCTION,  StringHandler
+        connection.setopt_str_handler :WRITEHEADER,     @response_header_handler
+      else
+        @response_header_handler = options[:response_header_handler]
+        connection.setopt_handler :HEADERFUNCTION,  CallHandler
+        connection.setopt_handler :WRITEHEADER,     @response_header_handler
       end
 
-      connection.setopt :URL,            url
+      unless method == :head
+        connection.setopt :ENCODING,  "identity, deflate, gzip"
+
+        if options[:response_body_handler].nil?
+#          @response_body_handler = FFI::MemoryPointer.from_string("")
+          @response_body_handler = ""
+          connection.setopt_str_handler :WRITEFUNCTION, StringHandler
+          connection.setopt_str_handler :FILE,          @response_body_handler
+        else
+          @response_body_handler = options[:response_body_handler]
+          connection.setopt_handler :WRITEFUNCTION, CallHandler
+          connection.setopt_handler :FILE,          @response_body_handler
+        end
+      end
+
+      connection.setopt :URL,            FFI::MemoryPointer.from_string(url)
 
       # Other common options (blame streamly guy)
       connection.setopt :FOLLOWLOCATION, 1
@@ -93,6 +112,7 @@ module Streamly
 =end
     def execute
       connection.perform
+      return response_body_handler
     end
     
     def self.execute(url, method=:get, options={})
