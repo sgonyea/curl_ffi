@@ -28,10 +28,6 @@ module CurlFFI
   INFO_DOUBLE           = 0x300000
   INFO_SLIST            = 0x400000
 
-
-
-
-
   CODE = enum :code, [
     :OK,                        0,
     :UNSUPPORTED_PROTOCOL,      1,
@@ -997,4 +993,9 @@ module CurlFFI
 
   attach_function :slist_append, :curl_slist_append, [:pointer, :string], :pointer
   attach_function :slist_free_all, :curl_slist_free_all, [:pointer], :void
+
+  class CurlSlist < FFI::Struct
+    layout  :data, :string,
+            :next, :pointer
+  end
 end
