@@ -13,7 +13,11 @@ module Streamly
     end
 
     StringHandler = Proc.new do |stream, size, nmemb, handler|
-      handler << stream
+      if handler.nil?
+        handler = stream.clone
+      else
+        handler << stream
+      end
       size * nmemb
     end
 
@@ -57,7 +61,7 @@ module Streamly
 
       if options[:response_header_handler].nil?
 #        @response_header_handler = FFI::MemoryPointer.from_string("")
-        @response_header_handler = ""
+        @response_header_handler = FFI::MemoryPointer.new(:pointer)
         connection.setopt_str_handler :HEADERFUNCTION,  StringHandler
         connection.setopt_str_handler :WRITEHEADER,     @response_header_handler
       else
@@ -71,7 +75,7 @@ module Streamly
 
         if options[:response_body_handler].nil?
 #          @response_body_handler = FFI::MemoryPointer.from_string("")
-          @response_body_handler = ""
+          @response_body_handler = FFI::MemoryPointer.new(:pointer)
           connection.setopt_str_handler :WRITEFUNCTION, StringHandler
           connection.setopt_str_handler :FILE,          @response_body_handler
         else
