@@ -945,6 +945,15 @@ module CurlFFI
     end
   end
 
+  # @TODO: checking to ensure that value is a proc?
+  def self.easy_setopt_handler(handle, option, value)
+    option = OPTION[option] if option.is_a?(Symbol)
+
+    if option >= OPTION_FUNCTIONPOINT
+      self.easy_setopt_handler(handle, option, value)
+    end
+  end
+
   attach_function :multi_add_handle, :curl_multi_add_handle, [:pointer, :pointer], :multi_code
   attach_function :multi_assign, :curl_multi_assign, [:pointer, :curl_socket_t, :pointer], :multi_code
   attach_function :multi_cleanup, :curl_multi_cleanup, [:pointer], :void

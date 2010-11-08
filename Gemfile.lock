@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    curl_ffi (0.0.3)
+    curl_ffi (0.0.4)
       ffi
 
 GEM

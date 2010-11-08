@@ -44,6 +44,10 @@ module CurlFFI
       check_code(CurlFFI.easy_setopt(@pointer, option, value))
     end
 
+    def setopt_handler(option, value)
+      check_code(CurlFFI.easy_setopt_handler(@pointer, option, value))
+    end
+
     def getinfo(info)
       info = INFO[info] if info.is_a?(Symbol)
 
@@ -63,6 +67,7 @@ module CurlFFI
         if result != :OK
           raise "Error - #{result}"
         end
+        return result
       end
 
       def getinfo_double(info)

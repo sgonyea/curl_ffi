@@ -1,89 +1,102 @@
-require "curl_ffi"
+require "ffi"
 require "singleton"
 
 module Streamly
   class Request
     include Singleton
 
-    attr_reader :connection, :error_buffer
-    
-=begin
+    attr_reader :response_header_handler, :response_body_handler
 
-=end
+    HeaderHandler = Proc.new do |stream, size, nmemb, handler|
+      case handler
+      when  String  then  handler += stream
+      else                handler.call(stream)
+      end
+      return(size * nmemb)
+    end
+
+    DataHandler = Proc.new do |stream, size, nmemb, handler|
+      case handler
+      when  String  then  handler += stream
+      else                handler.call(stream)
+      end
+      return(size * nmemb)
+    end
+
     # @TODO: Argumenting Checking + Error Handling
-    def initialize(url, method, options={})
+    def initialize(url, method=:get, options={})
       # url should be a string that doesn't suck
       # method should be :post, :get, :put, :delete, :head
       # options should contain any of the following keys:
       #   :headers, :response_header_handler, :response_body_handler, :payload (required if method = :post / :put)
-
-
+      
+      @response_header_handler  ||= options[:response_header_handler] || FFI::MemoryPointer.from_string("")
+      @response_body_handler    ||= options[:response_body_handler]   || FFI::MemoryPointer.from_string("")
 
       case method
-      when :get
-        connection.setopt CurlFFI::OPTION[:HTTPGET],        1
-      when :head
-        connection.setopt CurlFFI::OPTION[:NOBODY],         1
-      when :post
-        connection.setopt CurlFFI::OPTION[:POST],           1
-        connection.setopt CurlFFI::OPTION[:POSTFIELDS],     options[:payload]
-        connection.setopt CurlFFI::OPTION[:POSTFIELDSIZE],  options[:payload].size
-      when :put
-        connection.setopt CurlFFI::OPTION[:CUSTOMREQUEST],  "PUT"
-        connection.setopt CurlFFI::OPTION[:POSTFIELDS],     options[:payload]
-        connection.setopt CurlFFI::OPTION[:POSTFIELDSIZE],  options[:payload].size
-      when :delete
-        connection.setopt CurlFFI::OPTION[:CUSTOMREQUEST],  "DELETE"
+      when :get     then  connection.setopt :HTTPGET,        1
+      when :head    then  connection.setopt :NOBODY,         1
+      when :post    then  connection.setopt :POST,           1
+                          connection.setopt :POSTFIELDS,     options[:payload]
+                          connection.setopt :POSTFIELDSIZE,  options[:payload].size
+      when :put     then  connection.setopt :CUSTOMREQUEST,  "PUT"
+                          connection.setopt :POSTFIELDS,     options[:payload]
+                          connection.setopt :POSTFIELDSIZE,  options[:payload].size
+      when :delete  then  connection.setopt :CUSTOMREQUEST,  "DELETE"
+      # else I WILL CUT YOU
       end
+
+      if options[:headers].is_a? Hash and options[:headers].size > 0
+        options[:headers].each_pair do |key_and_value|
+          @request_headers = CurlFFI.slist_append(self.request_headers, key_and_value.join(": "))
+        end
+        connection.setopt :HTTPHEADER, @request_headers
+      end
+
+      connection.setopt_handler :HEADERFUNCTION,  HeaderHandler
+      connection.setopt_handler :WRITEHEADER,     @response_header_handler
 
       unless method == :head
-        connection.setopt CurlFFI::OPTION[:ENCODING],  "identity, deflate, gzip"
+        connection.setopt         :ENCODING,      "identity, deflate, gzip"
+        connection.setopt_handler :WRITEFUNCTION, HeaderHandler
+        connection.setopt_handler :WRITEDATA,     @response_header_handler
       end
 
-      connection.setopt CurlFFI::OPTION[:URL],            url
+      connection.setopt :URL,            url
 
       # Other common options (blame streamly guy)
-      connection.setopt CurlFFI::OPTION[:FOLLOWLOCATION], 1
-      connection.setopt CurlFFI::OPTION[:MAXREDIRS],      3
+      connection.setopt :FOLLOWLOCATION, 1
+      connection.setopt :MAXREDIRS,      3
 
       # This should be an option
-      connection.setopt CurlFFI::OPTION[:SSL_VERIFYPEER], 0
-      connection.setopt CurlFFI::OPTION[:SSL_VERIFYHOST], 0
+      connection.setopt :SSL_VERIFYPEER, 0
+      connection.setopt :SSL_VERIFYHOST, 0
 
-      connection.setopt CurlFFI::OPTION[:ERRORBUFFER],    error_buffer
+      connection.setopt :ERRORBUFFER,    error_buffer
 
-      
-=begin
-Header stuff - @TODO
-// Response header handling
-curl_easy_setopt(instance->handle, CURLOPT_HEADERFUNCTION, &header_handler);
-curl_easy_setopt(instance->handle, CURLOPT_HEADERDATA, instance->response_header_handler);
-=end
-
-=begin
-// Response body handling
-if (instance->request_method != sym_head) {
-  curl_easy_setopt(instance->handle, CURLOPT_ENCODING, "identity, deflate, gzip");
-  curl_easy_setopt(instance->handle, CURLOPT_WRITEFUNCTION, &data_handler);
-  curl_easy_setopt(instance->handle, CURLOPT_WRITEDATA, instance->response_body_handler);
-=end
-
-      
-
+      return self
     end
 
     def connection
       @connection ||= CurlFFI::Easy.new
     end
-    
+
     def error_buffer
       @error_buffer ||= FFI::MemoryPointer.new(:char, CurlFFI::ERROR_SIZE, :clear)
+    end
+    
+    def request_headers
+      @request_headers ||= FFI::MemoryPointer.from_string("")
     end
 =begin
 
 =end
     def execute
-      
+      connection.perform
+    end
+    
+    def self.execute(url, method=:get, options={})
+      new(url, method, options).execute
     end
 
   # streamly's .c internal methods:
