@@ -68,11 +68,9 @@ module CurlFFI
 
     protected
       def check_code(result)
-        
         if result != :OK
           raise "Error - #{result}" unless result.nil?
         end
-        return result
       end
 
       def getinfo_double(info)

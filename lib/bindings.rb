@@ -934,7 +934,9 @@ module CurlFFI
     elsif option >= OPTION_FUNCTIONPOINT
       self.easy_setopt_pointer(handle, option, value)
     elsif option >= OPTION_OBJECTPOINT
-      if value.respond_to?(:to_str)
+      if value.is_a?(Proc)
+        self.easy_setopt_pointer(handle, option, value)
+      elsif value.respond_to?(:to_str)
         self.easy_setopt_string(handle, option, value.to_str)
       else
         self.easy_setopt_pointer(handle, option, value)
