@@ -17,19 +17,19 @@ module CurlFFI
       @pointer = FFI::AutoPointer.new(CurlFFI.easy_duphandle(other.pointer), CurlFFI.method(:easy_cleanup))
     end
 
-    def escape(string)
-      str_pointer = CurlFFI.easy_escape(@pointer, string, string.length)
-      result = str_pointer.null? ? nil : str_pointer.read_string
+    def escape(_string)
+      str_pointer = CurlFFI.easy_escape(@pointer, _string, _string.length)
+      @escaped    = str_pointer.null? ? nil : str_pointer.read_string
       CurlFFI.free(str_pointer)
-      result
+      return(@escaped)
     end
 
     def unescape(string)
       int_pointer = FFI::MemoryPointer.new(:int)
       str_pointer = CurlFFI.easy_unescape(@pointer, string, string.length, int_pointer)
-      result = str_pointer.read_string(int_pointer.read_int)
+      @unescaped  = str_pointer.read_string(int_pointer.read_int)
       CurlFFI.free(str_pointer)
-      result
+      @unescaped
     end
 
     def error_string(error_code)
