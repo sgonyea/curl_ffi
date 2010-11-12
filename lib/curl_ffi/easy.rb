@@ -3,14 +3,20 @@ require "curl_ffi"
 module CurlFFI
   class Easy
 
-    attr_reader :pointer
+    attr_reader :pointer, :options
 
     def initialize
       @pointer = FFI::AutoPointer.new(CurlFFI.easy_init, CurlFFI.method(:easy_cleanup))
+      @options = {}
+    end
+
+    def reset_options
+      @options = {}
     end
 
     def reset
       CurlFFI.easy_reset(@pointer)
+      @options = {}
     end
 
     def initialize_copy(other)
@@ -19,7 +25,7 @@ module CurlFFI
 
     def escape(_string)
       str_pointer = CurlFFI.easy_escape(@pointer, _string, _string.length)
-      @escaped    = str_pointer.null? ? nil : str_pointer.read_string
+      @escaped    = str_pointer.null? ? nil : str_pointer.read_string.dup
       CurlFFI.free(str_pointer)
       return(@escaped)
     end
@@ -27,7 +33,7 @@ module CurlFFI
     def unescape(string)
       int_pointer = FFI::MemoryPointer.new(:int)
       str_pointer = CurlFFI.easy_unescape(@pointer, string, string.length, int_pointer)
-      @unescaped  = str_pointer.read_string(int_pointer.read_int)
+      @unescaped  = str_pointer.read_string(int_pointer.read_int).dup
       CurlFFI.free(str_pointer)
       @unescaped
     end
@@ -37,19 +43,16 @@ module CurlFFI
     end
 
     def perform
-      check_code(CurlFFI.easy_perform(@pointer))
+      check_code(@_code = CurlFFI.easy_perform(@pointer))
     end
 
     def setopt(option, value)
-      check_code(CurlFFI.easy_setopt(@pointer, option, value))
-    end
+      @_option = option
+      @_value  = value
 
-    def setopt_handler(option, value)
-      check_code(CurlFFI.easy_setopt_handler(@pointer, option, value))
-    end
+      check_code(@_code = CurlFFI.easy_setopt(@pointer, @_option, @_value))
 
-    def setopt_str_handler(option, value)
-      check_code(CurlFFI.easy_setopt_handler_string(@pointer, option, value))
+      @options[@_option] = @_value
     end
 
     def getinfo(info)
